@@ -1,0 +1,5 @@
+{
+    "event": "data",
+    "channel": "/sites/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx/stats/clients",
+    "data": "{\"mac\": \"001122334455\", \"site_id\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx\", \"assoc_time\": 1710912417, \"family\": \"\", \"model\": \"\", \"os\": \"\", \"manufacture\": \"Example Vendor\", \"bssid\": \"000000000000\", \"hostname\": \"example-host\", \"ip\": \"192.168.0.2\", \"ap_mac\": \"000011112222\", \"ap_id\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx\", \"last_seen\": 1712120416, \"uptime\": 1207999, \"ssid\": \"ExampleSSID\", \"wlan_id\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx\", \"dual_band\": false, \"is_guest\": false, \"key_mgmt\": \"WPA2-PSK/CCMP\", \"group\": \"\", \"band\": \"24\", \"channel\": 1, \"vlan_id\": \"1\", \"proto\": \"n\", \"rssi\": -61, \"snr\": 24, \"idle_time\": 3.0, \"tx_rate\": 26.0, \"rx_rate\": 6.0, \"tx_pkts\": 16433, \"rx_pkts\": 503295, \"tx_bytes\": 2203478, \"rx_bytes\": 27965922, \"tx_retries\": 5833, \"rx_retries\": 52355, \"tx_bps\": 0, \"rx_bps\": 0, \"_ttl\": 300}"
+}

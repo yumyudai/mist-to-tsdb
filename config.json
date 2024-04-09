@@ -1,0 +1,53 @@
+{
+    "mist": {
+        "endpoint": "api-ws.mist.com",
+        "apikey": "xx",
+        "debug": true,
+	"bufsize": 128
+    },
+    "tsdb": {
+        "driver": "awstimestream",
+        "debug": true,
+        "awstimestream": {
+            "region": "ap-northeast-1",
+            "database": "mist",
+            "maxretries": 3
+        }
+    },
+    "datasource": [
+        {
+            "channel": "/sites/xx/stats/clients",
+            "datalayout": "stats_client",
+            "table": "client",
+            "keys": [
+                "site_id",
+                "wlan_id",
+                "ssid",
+                "mac",
+                "hostname"
+            ],
+            "metrics": [
+                {
+                    "key": "uptime",
+                    "type": "BIGINT"
+                },
+		{
+                    "key": "tx_pkts",
+                    "type": "BIGINT"
+                },
+		{
+                    "key": "rx_pkts",
+                    "type": "BIGINT"
+                },
+		{
+                    "key": "tx_bytes",
+                    "type": "BIGINT"
+                },
+		{
+                    "key": "rx_bytes",
+                    "type": "BIGINT"
+                }
+            ]
+        }
+    ] 
+}

@@ -1,0 +1,3 @@
+out/
+config.json.prod
+make-and-push.sh

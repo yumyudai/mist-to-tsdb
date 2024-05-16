@@ -91,7 +91,13 @@ func (c *WsClient) Run(wg *sync.WaitGroup, killSig chan struct{}) error {
 		}
 
 		log.Printf("Reconnect after 10 seconds..")
-		time.Sleep(10 * time.Second)
+		ticker := time.NewTicker(10 * time.Second)
+		select {
+		case <-killSig:
+			return nil
+		case <-ticker.C:
+			break
+		}
 	}
 
 	return nil
@@ -112,6 +118,7 @@ func (c *WsClient) initConn() error {
 	if err != nil {
 		return fmt.Errorf("Failed to dial: %v", err)
 	}
+
 
 	// Send Subscription Requests
 	for i := 0; i < len(c.cfg.Subscriptions); i++ {
@@ -137,7 +144,7 @@ func (c *WsClient) finish() {
 	return
 }
 
-func (c *WsClient) readLoop(killChan chan struct{}) error {
+func (c *WsClient) readLoop(killSig chan struct{}) error {
 	dataChan := make(chan *mistdatafmt.WsMsgData, 1)
 	go func() {
 		for {
@@ -170,7 +177,7 @@ func (c *WsClient) readLoop(killChan chan struct{}) error {
 
 	for {
 		select {
-		case <-killChan:
+		case <-killSig:
 			return ErrShutdown
 		case wsmsg :=<-dataChan:
 			if wsmsg == nil {
@@ -192,13 +199,10 @@ func (c *WsClient) sendSubscribe(channel string) error {
 	}
 	
 	// Send
-	log.Printf("here")
 	err = c.wsConn.WriteJSON(req)
 	if err != nil {
-	log.Printf("here3")
 		return fmt.Errorf("Failed to send message: %v", err)
 	}
-	log.Printf("here2")
 
 	return nil
 }

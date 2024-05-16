@@ -87,12 +87,17 @@ func New(cfg Config) (*Rcvr, error) {
 }
 
 func (r *Rcvr) Run() error {
+	var shutdownSigs []chan struct{}
 	// Launch
 	clientShutdownSig := make(chan struct{}, 1)
+	shutdownSigs = append(shutdownSigs, clientShutdownSig)
 	go r.client.Run(r.wg, clientShutdownSig)
 
-	tsdbShutdownSig := make(chan struct{}, 1)
-	go r.tsdb.Run(r.wg, tsdbShutdownSig)
+	if r.cfg.Tsdb.Enabled {
+		tsdbShutdownSig := make(chan struct{}, 1)
+		shutdownSigs = append(shutdownSigs, tsdbShutdownSig)
+		go r.tsdb.Run(r.wg, tsdbShutdownSig)
+	}
 
 	// Main thread to wait until we get a kill signal or something go wrong
 	killSig := make(chan os.Signal, 1)
@@ -100,8 +105,9 @@ func (r *Rcvr) Run() error {
 	<-killSig
 
 	log.Printf("Caught kill signal, shutting down")
-	close(clientShutdownSig)
-	close(tsdbShutdownSig)
+	for _, sig := range(shutdownSigs) {
+		close(sig)
+	}
 	r.wg.Wait()
 
 	log.Printf("All threads exited")

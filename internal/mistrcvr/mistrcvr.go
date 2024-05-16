@@ -9,6 +9,7 @@ import (
 
 	"mist-to-tsdb/internal/wsclient"
 	"mist-to-tsdb/internal/tsdb"
+	"mist-to-tsdb/pkg/mistdatafmt"
 )
 
 type Rcvr struct {
@@ -38,7 +39,6 @@ func New(cfg Config) (*Rcvr, error) {
 		ApiEndpoint:	cfg.Mist.Endpoint,
 		ApiKey:		cfg.Mist.Apikey,
 		Debug:		cfg.Mist.Debug,
-		BufSize:	cfg.Mist.BufSize,
 		Subscriptions:	subs,
 	}
 
@@ -48,18 +48,39 @@ func New(cfg Config) (*Rcvr, error) {
 	}
 
 	// TSDB Client Initialization
-	tsdbConf := tsdb.TsdbIntfConf {
-		Debug:		cfg.Tsdb.Debug,
-		Driver:		cfg.Tsdb.Driver,
-		Datasource:	cfg.Datasource,
-		DataInChannel:	r.client.GetDataChannel(),
-	}
-	tsdbConf.DriverAwsTimeStream.Region = cfg.Tsdb.Awstimestream.Region
-	tsdbConf.DriverAwsTimeStream.Database = cfg.Tsdb.Awstimestream.Database
-	tsdbConf.DriverAwsTimeStream.MaxRetries = cfg.Tsdb.Awstimestream.Maxretries
-	r.tsdb, err = tsdb.New(tsdbConf)
-	if err != nil {
-		return nil, err
+	if cfg.Tsdb.Enabled {
+		var tsdbDSs []tsdb.TsdbIntfConfDS
+		for _, v := range(cfg.Datasource) {
+				ds := tsdb.TsdbIntfConfDS {
+						Channel:	v.Channel,
+						Datalayout:	v.Datalayout,
+						Table:		v.Tsdb.Table,
+						Keys:		v.Tsdb.Keys,
+						Metrics:	v.Tsdb.Metrics,
+				}
+
+				tsdbDSs = append(tsdbDSs, ds)
+		}
+
+		tsdbChan := make(chan mistdatafmt.WsMsgData, cfg.Tsdb.BufSize)
+		err = r.client.AddDataChannel(tsdbChan)
+		if err != nil {
+			return nil, err
+		}
+
+		tsdbConf := tsdb.TsdbIntfConf {
+				Debug:		cfg.Tsdb.Debug,
+				Driver:		cfg.Tsdb.Driver,
+				Datasource:	tsdbDSs,
+				DataInChannel:	tsdbChan,
+		}
+		tsdbConf.DriverAwsTimeStream.Region = cfg.Tsdb.Awstimestream.Region
+		tsdbConf.DriverAwsTimeStream.Database = cfg.Tsdb.Awstimestream.Database
+		tsdbConf.DriverAwsTimeStream.MaxRetries = cfg.Tsdb.Awstimestream.Maxretries
+		r.tsdb, err = tsdb.New(tsdbConf)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return r, nil 

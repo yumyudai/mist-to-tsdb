@@ -15,7 +15,7 @@ import (
 
 	"golang.org/x/net/http2"
 
-	"mist-to-tsdb/internal/wsclient"
+	"mist-to-tsdb/pkg/mistdatafmt"
 )
 
 type tsdbIntfAwsTS struct {
@@ -220,7 +220,7 @@ func (i *tsdbIntfAwsTS) initAws() error {
 	return nil
 }
 
-func (i *tsdbIntfAwsTS) AddRecordStatsClient(channel string, data wsclient.WsMsgClientStat) error {
+func (i *tsdbIntfAwsTS) AddRecordStatsClient(channel string, data mistdatafmt.WsMsgClientStat) error {
 	outParams, ok := i.dataOut[channel]
 	if !ok {
 		return fmt.Errorf("Data out parameters for channel %s was not found", channel)
@@ -233,7 +233,7 @@ func (i *tsdbIntfAwsTS) AddRecordStatsClient(channel string, data wsclient.WsMsg
 	// build data record
 	var keyDimensions []*timestreamwrite.Dimension
 	for _, v := range outParams.Keys {
-		dval, err := data.GetJsonKey(v)
+		dval, err := data.GetJsonKeyValueAsStr(v)
 		if err != nil {
 			return fmt.Errorf("JSON key %s does not exist", v)
 		} else if dval == "" {
@@ -256,7 +256,7 @@ func (i *tsdbIntfAwsTS) AddRecordStatsClient(channel string, data wsclient.WsMsg
 	curTime := time.Now().Unix()
 	var records []*timestreamwrite.Record
 	for _, v := range outParams.Metrics {
-		rval, err := data.GetJsonKey(v.Key)
+		rval, err := data.GetJsonKeyValueAsStr(v.Key)
 		if err != nil {
 			return fmt.Errorf("JSON key %s does not exist", v.Key)
 		} else if rval == "" {
@@ -307,6 +307,13 @@ func (i *tsdbIntfAwsTS) AddRecordStatsClient(channel string, data wsclient.WsMsg
 
 	return nil
 }
+
+func (i *tsdbIntfAwsTS) AddRecordRaw(channel string, data string) error {
+	log.Printf("Data layout raw is not supported for AWS TimeStream")
+
+	return nil
+}
+
 
 func (i *tsdbIntfAwsTS) writeRecords(tbl string, records []*timestreamwrite.Record) error {
 	var err error 

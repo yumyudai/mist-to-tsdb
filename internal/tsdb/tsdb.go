@@ -7,46 +7,49 @@ import (
 	"strings"
 	"sync"
 
-	"mist-to-tsdb/internal/wsclient"
+	"mist-to-tsdb/pkg/mistdatafmt"
 )
 
 type tsdbIntfBackend interface {
-	AddRecordStatsClient(string, wsclient.WsMsgClientStat) error
+	AddRecordStatsClient(string, mistdatafmt.WsMsgClientStat) error
+	AddRecordRaw(string, string) error
 }
 
 type TsdbIntfConf struct {
-	Debug			bool		`default:false`
-	Driver			string		`default:"awstimestream"`
+	Debug			bool		`mapstructure:"debug",default:false`
+	Driver			string		`mapstructure:"driver",default:"awstimestream"`
 	DriverAwsTimeStream	struct {
-		Region		string		`default:"us-east-1"`
-		Database	string
-		MaxRetries	int		`default:3`
-	}
+		Region		string		`mapstructure:"aws_region",default:"us-east-1"`
+		Database	string		`mapstructure:"database"`
+		MaxRetries	int		`mapstructure:"max_retries",default:3`
+	}                                       `mapstructure:"aws_timestream"`
 
-	Datasource		[]struct {
-		Channel		string
-		Datalayout	string
-		Table		string
-		Keys		[]string
-		Metrics		[]struct {
-			Key	string
-			Type	string
-		}
-	}
+	Datasource		[]TsdbIntfConfDS
+	DataInChannel		chan mistdatafmt.WsMsgData
+}
 
-	DataInChannel		chan wsclient.WsMsgData
+type TsdbIntfConfDS struct {
+	Channel		string	  `mapstructure:"channel"`
+	Datalayout	string	  `mapstructure:"data_layout"`
+	Table		string	  `mapstructure:"table"`
+	Keys		[]string  `mapstructure:"keys"`
+	Metrics []struct {
+		Key	string	  `mapstructure:"key"`
+		Type	string	  `mapstructure:"type"`
+	}                         `mapstructure:"metrics"`
 }
 
 type TsdbIntf struct {
 	cfg		TsdbIntfConf
 	backend		tsdbIntfBackend
-	dataIn		chan wsclient.WsMsgData
+	dataIn		chan mistdatafmt.WsMsgData
 	layoutMap	map[string]int
 	wg		*sync.WaitGroup
 }
 
 const (
 	LAYOUT_STATS_CLIENT = iota
+	LAYOUT_RAW
 	LAYOUT_NULL
 )
 
@@ -64,6 +67,8 @@ func New(cfg TsdbIntfConf) (*TsdbIntf, error) {
 		switch l {
 		case "stats_client":
 			r.layoutMap[cfg.Datasource[i].Channel] = LAYOUT_STATS_CLIENT
+		case "raw":
+			r.layoutMap[cfg.Datasource[i].Channel] = LAYOUT_RAW
 		default:
 			return nil, fmt.Errorf("Unsupported layout %s", l)
 		}
@@ -76,6 +81,13 @@ func New(cfg TsdbIntfConf) (*TsdbIntf, error) {
 		if err != nil {
 			return nil, err
 		}
+
+	case "dummy":
+		r.backend, err = tsdbIntfDummyNew(cfg)
+		if err != nil {
+			return nil, err
+		}
+
 	default:
 		return nil, fmt.Errorf("Unknown TSDB driver: %s", cfg.Driver)
 	}
@@ -122,7 +134,7 @@ func (i *TsdbIntf) processData(channel string, data string) error {
 		
 	switch layout {
 	case LAYOUT_STATS_CLIENT:
-		jsonData := &wsclient.WsMsgClientStat{}
+		jsonData := &mistdatafmt.WsMsgClientStat{}
 		err = json.Unmarshal([]byte(data), jsonData)
 		if err != nil {
 			return err
@@ -132,6 +144,13 @@ func (i *TsdbIntf) processData(channel string, data string) error {
 		if err != nil {
 			return err
 		}
+
+	case LAYOUT_RAW:
+		err = i.backend.AddRecordRaw(channel, data)
+		if err != nil {
+			return err
+		}
+
 	default:
 		return fmt.Errorf("Unsupported data layout for channel %s", channel)
 	}

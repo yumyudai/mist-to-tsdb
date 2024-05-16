@@ -37,10 +37,16 @@ func main() {
 
 	// Default Values
 	viper.SetDefault("mist.endpoint", "api-ws.mist.com")
-	viper.SetDefault("mist.bufsize", 128)
+	viper.SetDefault("tsdb.enabled", false)
+	viper.SetDefault("tsdb.debug", false)
 	viper.SetDefault("tsdb.driver", "awstimestream")
+	viper.SetDefault("tsdb.bufsize", 128)
 	viper.SetDefault("tsdb.awstimestream.region", "us-east-1")
 	viper.SetDefault("tsdb.awstimestream.maxretries", 3)
+	viper.SetDefault("pubsub.enabled", false)
+	viper.SetDefault("pubsub.debug", false)
+	viper.SetDefault("pubsub.driver", "kafka")
+	viper.SetDefault("pubsub.bufsize", 128)
 
 	// Read Configuration File Before Start
 	cobra.OnInitialize(func() {

@@ -10,13 +10,14 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+
+	"mist-to-tsdb/pkg/mistdatafmt"
 )
 
 type WsClientConf struct {
 	ApiEndpoint	string
 	ApiKey		string
 	Debug		bool	`default:false`
-	BufSize		int	`default:128`
 
 	Subscriptions	[]string
 }
@@ -24,14 +25,13 @@ type WsClientConf struct {
 type WsClient struct {
 	cfg		WsClientConf
 	endpoint	url.URL
-	msgChan		chan WsMsgData
+	msgChans	[]chan mistdatafmt.WsMsgData
 	wsConn		*websocket.Conn
 	wg		*sync.WaitGroup
 } 
 
 var (
 	ErrShutdown	= fmt.Errorf("Shutdown")
-	ErrNotFound	= fmt.Errorf("Key Not Found")
 )
 
 func New(cfg WsClientConf) (*WsClient, error) {
@@ -51,7 +51,6 @@ func New(cfg WsClientConf) (*WsClient, error) {
 					Host:	cfg.ApiEndpoint,
 					Path:	"/api-ws/v1/stream",
 				},
-		msgChan:	make(chan WsMsgData, cfg.BufSize),
 		wsConn:		nil,
 		wg:		nil,
 	}
@@ -63,8 +62,9 @@ func New(cfg WsClientConf) (*WsClient, error) {
 	return r, nil
 }
 
-func (c *WsClient) GetDataChannel() chan WsMsgData {
-	return c.msgChan
+func (c *WsClient) AddDataChannel(newChan chan mistdatafmt.WsMsgData) error {
+	c.msgChans = append(c.msgChans, newChan)
+	return nil
 }
 
 func (c *WsClient) Run(wg *sync.WaitGroup, killSig chan struct{}) error {
@@ -138,7 +138,7 @@ func (c *WsClient) finish() {
 }
 
 func (c *WsClient) readLoop(killChan chan struct{}) error {
-	dataChan := make(chan *WsMsgData, 1)
+	dataChan := make(chan *mistdatafmt.WsMsgData, 1)
 	go func() {
 		for {
 			msgType, data, err := c.wsConn.ReadMessage()
@@ -157,12 +157,13 @@ func (c *WsClient) readLoop(killChan chan struct{}) error {
 				continue
 			}
 
-			wsmsg := &WsMsgData{}
+			wsmsg := &mistdatafmt.WsMsgData{}
 			err = json.Unmarshal(data, wsmsg)
 			if err != nil {
 				log.Printf("Failed to read JSON: %v", err)
 				continue
 			}
+
 			dataChan <-wsmsg
 		}
 	}()
@@ -186,20 +187,23 @@ func (c *WsClient) sendSubscribe(channel string) error {
 	var err error
 
 	// Build Message
-	req := WsMsgSubscribe {
+	req := mistdatafmt.WsMsgSubscribe {
 		Subscribe:	channel,
 	}
 	
 	// Send
+	log.Printf("here")
 	err = c.wsConn.WriteJSON(req)
 	if err != nil {
+	log.Printf("here3")
 		return fmt.Errorf("Failed to send message: %v", err)
 	}
+	log.Printf("here2")
 
 	return nil
 }
 
-func (c *WsClient) processMsg(m *WsMsgData) {
+func (c *WsClient) processMsg(m *mistdatafmt.WsMsgData) {
 	switch m.Event {
 	case "channel_subscribed":
 		log.Printf("Subscription Successful: %s", m.Channel)
@@ -211,7 +215,10 @@ func (c *WsClient) processMsg(m *WsMsgData) {
 		if c.cfg.Debug {
 			log.Printf("Recv WebSocket Data: Channel %s Data %s", m.Channel, m.Data)
 		}
-		c.msgChan <-*m
+
+		for _, ch := range(c.msgChans) {
+			ch <-*m
+		}
 
 	default:
 		log.Printf("Received event not implemented: %s", m.Event)

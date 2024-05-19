@@ -46,6 +46,7 @@ func main() {
 	viper.SetDefault("pubsub.enabled", false)
 	viper.SetDefault("pubsub.debug", false)
 	viper.SetDefault("pubsub.driver", "kafka")
+	viper.SetDefault("pubsub.kafka.async", true)
 	viper.SetDefault("pubsub.bufsize", 128)
 
 	// Read Configuration File Before Start

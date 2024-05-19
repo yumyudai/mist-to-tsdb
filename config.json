@@ -20,10 +20,17 @@
 	"driver": "kafka",
 	"debug": true,
 	"kafka": {
+            "async": true,
+            "flush_wait_seconds": 10,
 	    "bootstrap_servers": "host1:9902",
 	    "client_id": "mistrcvr",
 	    "client_id_use_hostname": true,
-	    "acks": "all"
+            "client_options": [
+                {
+                    "key": "acks",
+                    "value": "all"
+                }
+            ]
 	}
     },
     "datasource": [
@@ -63,7 +70,13 @@
 		]
 	    },
 	    "pubsub": {
-		"topic": "client"
+		"topic": "client",
+		"header": [
+                    {
+                        "key": "site_id",
+                        "value": "xx"
+                    }
+		]
 	    }
         }
     ] 

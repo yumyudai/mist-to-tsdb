@@ -11,7 +11,7 @@ type Config struct {
 		Driver			string	  `mapstructure:"driver"`
 		Debug			bool	  `mapstructure:"debug"`
 		BufSize			int	  `mapstructure:"channel_buffer_size"`
-		Awstimestream struct {
+		Awstimestream		struct {
 			Region		string	  `mapstructure:"aws_region"`
 			Database	string	  `mapstructure:"database"`
 			Maxretries	int	  `mapstructure:"max_retries"`
@@ -23,10 +23,15 @@ type Config struct {
 		Debug			bool	  `mapstructure:"debug"`
 		BufSize			int	  `mapstructure:"channel_buffer_size"`
 		Kafka struct {
+			Async		bool	  `mapstructure:"async"`
 			Bootstrapsvrs	string	  `mapstructure:"bootstrap_servers"`
 			Clientid	string	  `mapstructure:"client_id"`
 			CidUseHostname	bool	  `mapstructure:"client_id_use_hostname"`
-			Acks		string	  `mapstructure:"acks"`
+			ClientOpts	[]struct {
+				Key	string	  `mapstructure:"key"`
+				Value	string	  `mapstructure:"value"`
+			}			  `mapstructure:"client_options"`
+			FlushWait	int	  `mapstructure:"flush_wait_seconds"`
 		}                                 `mapstructure:"kafka"`
 	}                                         `mapstructure:"pubsub"`
 	Datasource []struct {
@@ -35,13 +40,17 @@ type Config struct {
 		Tsdb			struct {
 			Table		string	  `mapstructure:"table"`
 			Keys		[]string  `mapstructure:"keys"`
-			Metrics []struct {
+			Metrics		[]struct {
 				Key	string	  `mapstructure:"key"`
 				Type	string	  `mapstructure:"type"`
 			}                         `mapstructure:"metrics"`
 		}                                 `mapstructure:"tsdb"`
 		Pubsub			struct {
 			Topic		string	  `mapstructure:"topic"`
+			Header		[]struct {
+				Key	string	  `mapstructure:"key"`
+				Value	string	  `mapstructure:"value"`
+			}			  `mapstructure:"header"`
 		}                                 `mapstructure:"pubsub"`
 	}                                         `mapstructure:"datasource"`
 }

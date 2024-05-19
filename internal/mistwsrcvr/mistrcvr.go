@@ -1,4 +1,4 @@
-package mistrcvr
+package mistwsrcvr
 
 import (
 	"log"

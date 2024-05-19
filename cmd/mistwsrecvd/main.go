@@ -7,21 +7,21 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"mist-to-tsdb/internal/mistrcvr"
+	"mist-to-tsdb/internal/mistwsrcvr"
 )
 
 func main() {
 	var err error
 	var configFile string
-	var config mistrcvr.Config
+	var config mistwsrcvr.Config
 
 	rootCmd := &cobra.Command {
-		Use: "mistrecvd",
+		Use: "mistwsrecvd",
 		Short: "Receive data from Mist WebSocket API and write to TSDB",
 		// Main Entry Point
 		Run: func(c *cobra.Command, args []string) {
 			// Init 
-			rcvr, err := mistrcvr.New(config)
+			rcvr, err := mistwsrcvr.New(config)
 			if err != nil {
 				log.Fatalf("Failed on init: %v", err)
 			}

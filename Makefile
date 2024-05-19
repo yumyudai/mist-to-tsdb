@@ -4,5 +4,5 @@ clean:
 
 local:
 	mkdir out
-	go build -o out/mistrecvd cmd/mistrecvd/main.go
+	go build -o out/mistwsrecvd cmd/mistwsrecvd/main.go
 

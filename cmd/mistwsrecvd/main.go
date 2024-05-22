@@ -17,7 +17,7 @@ func main() {
 
 	rootCmd := &cobra.Command {
 		Use: "mistwsrecvd",
-		Short: "Receive data from Mist WebSocket API and write to TSDB",
+		Short: "Receive data from Mist WebSocket API and write to TSDB and Pubsub interface",
 		// Main Entry Point
 		Run: func(c *cobra.Command, args []string) {
 			// Init 

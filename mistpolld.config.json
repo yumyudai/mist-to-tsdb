@@ -25,6 +25,7 @@
         {
             "uri": "/api/v1/sites/xx/maps",
             "data_layout": "maps",
+            "unique": "id",
             "interval": 60,
 	    "watch_change_keys": [
                  "url",
@@ -44,12 +45,13 @@
         {
             "uri": "/api/v1/sites/xx/zones",
             "data_layout": "zones",
+            "unique": "id",
             "interval": 60,
 	    "watch_change_keys": [
                  "modified_time"
             ],
 	    "pubsub": {
-		"topic": "map_info",
+		"topic": "zone_info",
 		"header": [
                     {
                         "key": "site_id",

@@ -27,23 +27,25 @@ type PollAgent struct {
 	Debug		bool
 
 	intvlTicker	*time.Ticker
-	prevData	map[string]*mistdatafmt.MistDataFmtIntf
+	prevData	map[string]mistdatafmt.MistDataFmtIntf
 	killSig		chan struct{}
 	wg		*sync.WaitGroup
 }
 
 func (s *PollAgent) Run(wg *sync.WaitGroup, killSig chan struct{}) error {
-	log.Printf("agent#%d: start poll agent thread (uri %s)", s.Id, s.Uri)
+	log.Printf("agent#%d: start poll agent thread (uri %s, interval %d)", s.Id, s.Uri, s.Interval)
 
 	// init
 	s.intvlTicker = time.NewTicker(time.Duration(s.Interval) * time.Second)
-	s.prevData = make(map[string]*mistdatafmt.MistDataFmtIntf)
+	s.prevData = make(map[string]mistdatafmt.MistDataFmtIntf)
 	s.killSig = killSig
 	s.wg = wg
 
 	// start
 	wg.Add(1)
 	defer s.finish()
+
+	s.runRequest()
 	for {
 		select {
 		case <-killSig:
@@ -170,18 +172,19 @@ func (s *PollAgent) processData(data string) {
 				continue
 			}
 
-			if !exists || s.dataHasChanged(*prev, entry) {
+			if !exists || s.dataHasChanged(prev, entry) {
 				if s.Debug {
 					log.Printf("agent#%d: publish %s exists=%v", s.Id, uKeyVal, exists)
 				}
 
-				out, err := json.Marshal(*prev)
+				out, err := json.Marshal(entry)
 				if err != nil {
 					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uKeyVal, err)
 					continue
 				}
 
 				s.doPublish(string(out))
+				s.prevData[s.UniqueKey] = entry
 			}
 		}
 
@@ -210,18 +213,19 @@ func (s *PollAgent) processData(data string) {
 				continue
 			}
 
-			if !exists || s.dataHasChanged(*prev, entry) {
+			if !exists || s.dataHasChanged(prev, entry) {
 				if s.Debug {
 					log.Printf("agent#%d: publish %s exists=%v", s.Id, uKeyVal, exists)
 				}
 
-				out, err := json.Marshal(*prev)
+				out, err := json.Marshal(entry)
 				if err != nil {
 					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uKeyVal, err)
 					continue
 				}
 
 				s.doPublish(string(out))
+				s.prevData[s.UniqueKey] = entry
 			}
 		}
 

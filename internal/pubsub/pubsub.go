@@ -93,10 +93,6 @@ func (i *PubsubIntf) Run(wg *sync.WaitGroup, killSig chan struct{}) error {
 		case <-killSig:
 			return nil
 		case msg := <-i.dataIn:
-			if i.cfg.Debug {
-				log.Printf("PubSub Start Process: %v", msg)
-			}
-
 			err = i.processData(msg.Origin, msg.Data)
 			if err != nil {
 				log.Printf("PubSub driver has thrown error: %v", err)

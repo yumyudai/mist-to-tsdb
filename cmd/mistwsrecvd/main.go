@@ -53,7 +53,17 @@ func main() {
 	cobra.OnInitialize(func() {
 		_, err := os.Stat(configFile)
 		if os.IsNotExist(err) {
-			log.Fatalf("Config file %s does not exist!", configFile)
+			envConfFile := os.Getenv("CONFIG_FILE")
+			if envConfFile != "" {
+				_, err := os.Stat(envConfFile)
+				if os.IsNotExist(err) {
+					log.Fatalf("Config file %s does not exist!", envConfFile)
+				}
+
+				configFile = envConfFile
+			} else {
+				log.Fatalf("Config file %s does not exist!", configFile)
+			}
 		}
 
 		viper.SetConfigFile(configFile)

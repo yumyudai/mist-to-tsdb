@@ -1,5 +1,5 @@
 VER := $(shell git rev-parse HEAD | tr -d "\n")
-all: clean gitver mistwsrecvd mistpolld
+all: clean mistwsrecvd mistpolld
 clean:
 	rm -rf out
 

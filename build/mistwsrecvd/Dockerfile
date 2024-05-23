@@ -9,7 +9,7 @@ ENV GOOS=linux
 ENV GOARCH=amd64
 RUN apk -U add ca-certificates
 RUN apk update && apk add pkgconf git bash build-base sudo
-RUN go mod download
+RUN go mod download && go mod vendor
 RUN go build -tags musl -o mistwsrecvd ./cmd/mistwsrecvd/main.go
 
 # Stage 2

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"mist-to-tsdb/internal/common"
 	"mist-to-tsdb/pkg/mistdatafmt"
 )
 
@@ -25,7 +26,7 @@ type TsdbIntfConf struct {
 	}                                       `mapstructure:"aws_timestream"`
 
 	Datasource		[]TsdbIntfConfDS
-	DataInChannel		chan mistdatafmt.WsMsgData
+	DataInChannel		chan common.MistApiData
 }
 
 type TsdbIntfConfDS struct {
@@ -42,7 +43,7 @@ type TsdbIntfConfDS struct {
 type TsdbIntf struct {
 	cfg		TsdbIntfConf
 	backend		tsdbIntfBackend
-	dataIn		chan mistdatafmt.WsMsgData
+	dataIn		chan common.MistApiData
 	layoutMap	map[string]int
 	wg		*sync.WaitGroup
 }
@@ -113,7 +114,7 @@ func (i *TsdbIntf) Run(wg *sync.WaitGroup, killSig chan struct{}) error {
 				log.Printf("TSDB Start Process: %v", msg)
 			}
 
-			err = i.processData(msg.Channel, msg.Data)
+			err = i.processData(msg.Origin, msg.Data)
 			if err != nil {
 				log.Printf("TSDB driver has thrown error: %v", err)
 				log.Printf("Failed data: %v", msg)

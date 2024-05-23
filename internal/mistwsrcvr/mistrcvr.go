@@ -7,10 +7,10 @@ import (
 	"sync"
 	"syscall"
 
+	"mist-to-tsdb/internal/common"
 	"mist-to-tsdb/internal/wsclient"
 	"mist-to-tsdb/internal/tsdb"
 	"mist-to-tsdb/internal/pubsub"
-	"mist-to-tsdb/pkg/mistdatafmt"
 )
 
 type Rcvr struct {
@@ -64,7 +64,7 @@ func New(cfg Config) (*Rcvr, error) {
 			tsdbDSs = append(tsdbDSs, ds)
 		}
 
-		tsdbChan := make(chan mistdatafmt.WsMsgData, cfg.Tsdb.BufSize)
+		tsdbChan := make(chan common.MistApiData, cfg.Tsdb.BufSize)
 		err = r.client.AddDataChannel(tsdbChan)
 		if err != nil {
 			return nil, err
@@ -127,7 +127,7 @@ func New(cfg Config) (*Rcvr, error) {
 		}
 
 
-		pubsubChan := make(chan mistdatafmt.WsMsgData, cfg.Pubsub.BufSize)
+		pubsubChan := make(chan common.MistApiData, cfg.Pubsub.BufSize)
 		err = r.client.AddDataChannel(pubsubChan)
 		if err != nil {
 			return nil, err

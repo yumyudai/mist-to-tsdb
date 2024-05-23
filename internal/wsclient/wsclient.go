@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
+	"mist-to-tsdb/internal/common"
 	"mist-to-tsdb/pkg/mistdatafmt"
 )
 
@@ -25,7 +26,7 @@ type WsClientConf struct {
 type WsClient struct {
 	cfg		WsClientConf
 	endpoint	url.URL
-	msgChans	[]chan mistdatafmt.WsMsgData
+	msgChans	[]chan common.MistApiData
 	wsConn		*websocket.Conn
 	wg		*sync.WaitGroup
 } 
@@ -62,7 +63,7 @@ func New(cfg WsClientConf) (*WsClient, error) {
 	return r, nil
 }
 
-func (c *WsClient) AddDataChannel(newChan chan mistdatafmt.WsMsgData) error {
+func (c *WsClient) AddDataChannel(newChan chan common.MistApiData) error {
 	c.msgChans = append(c.msgChans, newChan)
 	return nil
 }
@@ -220,8 +221,13 @@ func (c *WsClient) processMsg(m *mistdatafmt.WsMsgData) {
 			log.Printf("Recv WebSocket Data: Channel %s Data %s", m.Channel, m.Data)
 		}
 
+		out := common.MistApiData {
+			Origin: m.Channel,
+			Data: m.Data,
+		}
+
 		for _, ch := range(c.msgChans) {
-			ch <-*m
+			ch <-out
 		}
 
 	default:

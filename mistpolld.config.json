@@ -1,0 +1,62 @@
+{
+    "mist": {
+        "endpoint": "api.mist.com",
+        "apikey": "xx",
+        "debug": true
+    },
+    "pubsub": {
+	"driver": "kafka",
+	"debug": true,
+	"kafka": {
+            "async": true,
+            "flush_wait_seconds": 10,
+	    "bootstrap_servers": "host1:9902",
+	    "client_id": "mistrcvr",
+	    "client_id_use_hostname": true,
+            "client_options": [
+                {
+                    "key": "acks",
+                    "value": "all"
+                }
+            ]
+	}
+    },
+    "datasource": [
+        {
+            "uri": "/api/v1/sites/xx/maps",
+            "data_layout": "maps",
+            "interval": 60,
+	    "watch_change_keys": [
+                 "url",
+                 "height",
+                 "width"
+            ],
+	    "pubsub": {
+		"topic": "map_info",
+		"header": [
+                    {
+                        "key": "site_id",
+                        "value": "xx"
+                    }
+		]
+	    }
+        },
+        {
+            "uri": "/api/v1/sites/xx/zones",
+            "data_layout": "zones",
+            "interval": 60,
+	    "watch_change_keys": [
+                 "modified_time"
+            ],
+	    "pubsub": {
+		"topic": "map_info",
+		"header": [
+                    {
+                        "key": "site_id",
+                        "value": "xx"
+                    }
+		]
+	    }
+        }
+    ] 
+}

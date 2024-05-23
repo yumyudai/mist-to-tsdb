@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	"mist-to-tsdb/pkg/mistdatafmt"
+	"mist-to-tsdb/internal/common"
 )
 
 type pubsubIntfBackend interface {
@@ -18,7 +18,7 @@ type PubsubIntfConf struct {
 	Driver			string				`mapstructure:"driver",default:"kafka"`
 	DriverKafka		PubsubIntfConfDrvKafka		`mapstructure:"kafka"`
 	Datasource		[]PubsubIntfTarget
-	DataInChannel		chan mistdatafmt.WsMsgData
+	DataInChannel		chan common.MistApiData
 }
 
 type GenericKV struct {
@@ -35,7 +35,7 @@ type PubsubIntfTarget struct {
 type PubsubIntf struct {
 	cfg		PubsubIntfConf
 	backend		pubsubIntfBackend
-	dataIn		chan mistdatafmt.WsMsgData
+	dataIn		chan common.MistApiData
 	wg		*sync.WaitGroup
 	topicMap	map[string]PubsubIntfTarget
 }
@@ -97,7 +97,7 @@ func (i *PubsubIntf) Run(wg *sync.WaitGroup, killSig chan struct{}) error {
 				log.Printf("PubSub Start Process: %v", msg)
 			}
 
-			err = i.processData(msg.Channel, msg.Data)
+			err = i.processData(msg.Origin, msg.Data)
 			if err != nil {
 				log.Printf("PubSub driver has thrown error: %v", err)
 				log.Printf("Failed data: %v", msg)

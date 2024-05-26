@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	"mist-to-tsdb/internal/common"
+	"github.com/yumyudai/misttools/internal/common"
 )
 
 type pubsubIntfBackend interface {

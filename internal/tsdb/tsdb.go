@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"mist-to-tsdb/internal/common"
-	"mist-to-tsdb/pkg/mistdatafmt"
+	"github.com/yumyudai/misttools/internal/common"
+	"github.com/yumyudai/misttools/pkg/mistdatafmt"
 )
 
 type tsdbIntfBackend interface {

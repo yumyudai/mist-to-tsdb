@@ -15,7 +15,7 @@ import (
 
 	"golang.org/x/net/http2"
 
-	"mist-to-tsdb/pkg/mistdatafmt"
+	"github.com/yumyudai/misttools/pkg/mistdatafmt"
 )
 
 type tsdbIntfAwsTS struct {

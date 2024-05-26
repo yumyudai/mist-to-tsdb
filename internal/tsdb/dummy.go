@@ -3,7 +3,7 @@ package tsdb
 import (
 	"log"
 
-	"mist-to-tsdb/pkg/mistdatafmt"
+	"github.com/yumyudai/misttools/pkg/mistdatafmt"
 )
 
 type tsdbIntfDummy struct{}

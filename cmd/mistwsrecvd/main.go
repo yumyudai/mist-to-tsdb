@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"mist-to-tsdb/internal/mistwsrcvr"
+	"github.com/yumyudai/misttools/internal/mistwsrcvr"
 )
 
 func main() {

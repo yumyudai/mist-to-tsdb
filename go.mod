@@ -1,4 +1,4 @@
-module mist-to-tsdb
+module github.com/yumyudai/misttools
 
 go 1.22.1
 

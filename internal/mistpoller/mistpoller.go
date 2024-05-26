@@ -7,8 +7,8 @@ import (
 	"sync"
 	"syscall"
 
-	"mist-to-tsdb/internal/common"
-	"mist-to-tsdb/internal/pubsub"
+	"github.com/yumyudai/misttools/internal/common"
+	"github.com/yumyudai/misttools/internal/pubsub"
 )
 
 type Poller struct {

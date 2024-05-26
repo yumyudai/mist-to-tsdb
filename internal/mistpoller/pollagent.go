@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -165,26 +166,26 @@ func (s *PollAgent) processData(data string) {
 		}
 
 		for _, entry := range(entries) {
-			prev, exists := s.prevData[s.UniqueKey]
-			uKeyVal, err := entry.GetJsonKeyValueAsStr(s.UniqueKey)
+			uniqueKeyVal, err := entry.GetJsonKeyValueAsStr(s.UniqueKey)
 			if err != nil {
-				log.Printf("agent%d: failed to get unique key %s value (%v)", s.Id, s.UniqueKey, err)
+				log.Printf("agent%d: failed to get value of unique key %s (%v)", s.Id, s.UniqueKey, err)
 				continue
 			}
 
+			prev, exists := s.prevData[uniqueKeyVal]
 			if !exists || s.dataHasChanged(prev, entry) {
 				if s.Debug {
-					log.Printf("agent#%d: publish %s exists=%v", s.Id, uKeyVal, exists)
+					log.Printf("agent#%d: publish %s exists=%v", s.Id, uniqueKeyVal, exists)
 				}
 
 				out, err := json.Marshal(entry)
 				if err != nil {
-					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uKeyVal, err)
+					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uniqueKeyVal, err)
 					continue
 				}
 
 				s.doPublish(string(out))
-				s.prevData[s.UniqueKey] = entry
+				s.prevData[uniqueKeyVal] = entry
 			}
 		}
 
@@ -206,26 +207,27 @@ func (s *PollAgent) processData(data string) {
 		}
 
 		for _, entry := range(entries) {
-			prev, exists := s.prevData[s.UniqueKey]
-			uKeyVal, err := entry.GetJsonKeyValueAsStr(s.UniqueKey)
+			uniqueKeyVal, err := entry.GetJsonKeyValueAsStr(s.UniqueKey)
 			if err != nil {
-				log.Printf("agent%d: failed to get unique key %s value (%v)", s.Id, s.UniqueKey, err)
+				log.Printf("agent%d: failed to get value of unique key %s (%v)", s.Id, s.UniqueKey, err)
 				continue
 			}
 
+			// TODO: vertices/vertices_m fields may need to be sorted before comparing
+			prev, exists := s.prevData[uniqueKeyVal]
 			if !exists || s.dataHasChanged(prev, entry) {
 				if s.Debug {
-					log.Printf("agent#%d: publish %s exists=%v", s.Id, uKeyVal, exists)
+					log.Printf("agent#%d: publish %s exists=%v", s.Id, uniqueKeyVal, exists)
 				}
 
 				out, err := json.Marshal(entry)
 				if err != nil {
-					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uKeyVal, err)
+					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uniqueKeyVal, err)
 					continue
 				}
 
 				s.doPublish(string(out))
-				s.prevData[s.UniqueKey] = entry
+				s.prevData[uniqueKeyVal] = entry
 			}
 		}
 
@@ -245,34 +247,32 @@ func (s *PollAgent) processData(data string) {
 
 func (s *PollAgent) dataHasChanged(prevData mistdatafmt.MistDataFmtIntf, currData mistdatafmt.MistDataFmtIntf) bool {
 	for _, key := range(s.WatchKeys) {
-		uKeyVal, _ := prevData.GetJsonKeyValueAsStr(s.UniqueKey)
-		prevVal, err := prevData.GetJsonKeyValueAsStr(key)
+		uKeyVal, _ := prevData.GetJsonKeyValueAsStr(s.UniqueKey) // for debugging
+
+		prevVal, err := prevData.GetJsonKeyValue(key)
 		if err != nil {
-			log.Printf("agent#%d: failed to convert json key (%s) to value (%v)", s.Id, key, err)
+			log.Printf("agent#%d: failed to get json key %s (%v)", s.Id, key, err)
 			return false
 		}
 
-		currVal, err := currData.GetJsonKeyValueAsStr(key)
+		currVal, err := currData.GetJsonKeyValue(key)
 		if err != nil {
-			log.Printf("agent#%d: failed to convert json key (%s) to value (%v)", s.Id, key, err)
+			log.Printf("agent#%d: failed to get json key %s (%v)", s.Id, key, err)
 			return false
 		}
 
-		if s.Debug { 
-			log.Printf("agent#%d: %s key %s prev %s curr %s", s.Id, uKeyVal, key, prevVal, currVal)
-		}
-
-		if prevVal != currVal {
+		if !reflect.DeepEqual(prevVal, currVal) {
 			if s.Debug {
-				log.Printf("agent#%d: %s data has changed", s.Id, uKeyVal)
-			}
+				log.Printf("agent#%d: %s has changed (key %s prev %s curr %s)", s.Id, uKeyVal, key, prevVal, currVal)
+			} 
 			return true
+		} else if s.Debug {
+			log.Printf("agent#%d: %s data has not changed (%s)", s.Id, uKeyVal, currVal)
 		}
 	}
 
 	return false
 }
-
 func (s *PollAgent) doPublish(data string) {
 	out := common.MistApiData {
 		Origin: s.Uri,

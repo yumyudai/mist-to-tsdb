@@ -33,6 +33,55 @@ type ApiDataMapEntry struct {
 	// wallpath, sitesurvey_path, wayfinding_path are skipped..
 }
 
+func (d *ApiDataMapEntry) GetJsonKeyValue(key string) (interface{}, error) {
+	switch key {
+	case "name":
+		return d.Name, nil
+	case "type":
+		return d.Name, nil
+	case "id":
+		return d.Id, nil
+	case "site_id":
+		return d.SiteId, nil
+	case "org_id":
+		return d.OrgId, nil
+	case "url":
+		return d.Url, nil
+	case "thumbnail_url":
+		return d.ThumbnailUrl, nil
+	case "locked":
+		return d.Locked, nil
+	case "use_auto_orientation":
+		return d.UseAutoOrientation, nil
+	case "use_auto_placement":
+		return d.UseAutoPlacement, nil
+	case "width_m":
+		return d.WidthM, nil
+	case "height_m":
+		return d.HeightM, nil
+	case "width":
+		return d.Width, nil
+	case "height":
+		return d.Height, nil
+	case "ppm":
+		return d.PPM, nil
+	case "orientation":
+		return d.Orientation, nil
+	case "occupancy_limit":
+		return d.OccupancyLimit, nil
+	case "created_time":
+		return d.CreatedTime, nil
+	case "modified_time":
+		return d.ModifiedTime, nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
+}
+
+
+
 func (d *ApiDataMapEntry) GetJsonKeyValueAsStr(key string) (string, error) {
 	switch key {
 	case "name":
@@ -157,6 +206,35 @@ type ApiDataZoneVertice struct {
 	Y			json.Number		`json:"y"`
 }
 
+func (d *ApiDataZoneEntry) GetJsonKeyValue(key string) (interface{}, error) {
+	switch key {
+	case "name":
+		return d.Name, nil
+	case "id":
+		return d.Id, nil
+	case "map_id":
+		return d.MapId, nil
+	case "site_id":
+		return d.SiteId, nil
+	case "org_id":
+		return d.OrgId, nil
+	case "occupancy_limit":
+		return d.OccupancyLimit, nil
+	case "created_time":
+		return d.CreatedTime, nil
+	case "modified_time":
+		return d.ModifiedTime, nil
+	case "vertices":
+		return d.Vertices, nil
+	case "vertices_m":
+		return d.VerticesM, nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
+}
+
 func (d *ApiDataZoneEntry) GetJsonKeyValueAsStr(key string) (string, error) {
 	switch key {
 	case "name":
@@ -210,6 +288,19 @@ func (d *ApiDataZoneEntry) GetJsonKeyValueAsInt64(key string) (int64, error) {
 	}
 
 	return 0, fmt.Errorf("Specified key not found")
+}
+
+func (d *ApiDataZoneVertice) GetJsonKeyValue(key string) (interface{}, error) {
+	switch key {
+	case "x":
+		return d.X, nil
+	case "y":
+		return d.Y, nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
 }
 
 func (d *ApiDataZoneVertice) GetJsonKeyValueAsStr(key string) (string, error) {

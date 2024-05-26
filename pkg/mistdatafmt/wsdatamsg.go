@@ -77,6 +77,109 @@ type WsMsgClientStat struct {
 	Ttl		json.Number	`json:"_ttl"`
 }
 
+func (m *WsMsgClientStat) GetJsonKeyValue(key string) (interface{}, error) {
+	switch key {
+	case "mac":
+		return m.Mac, nil
+	case "site_id":
+		return m.SiteId, nil
+	case "assoc_time":
+		return m.AssocTime, nil
+	case "family":
+		return m.Family, nil
+	case "model":
+		return m.Model, nil
+	case "os":
+		return m.Os, nil
+	case "manufacture":
+		return m.Manufacture, nil
+	case "bssid":
+		return m.Bssid, nil
+	case "username":
+		return m.Username, nil
+	case "hostname":
+		return m.Hostname, nil
+	case "ip":
+		return m.Ip, nil
+	case "ip6":
+		return m.Ip6, nil
+	case "ap_mac":
+		return m.ApMac, nil
+	case "ap_id":
+		return m.ApId, nil
+	case "last_seen":
+		return m.LastSeen, nil
+	case "uptime":
+		return m.Uptime, nil
+	case "ssid":
+		return m.Ssid, nil
+	case "wlan_id":
+		return m.WlanId, nil
+	case "psk_id":
+		return m.PskId, nil
+	case "dual_band":
+		return m.DualBand, nil
+	case "is_guest":
+		return m.IsGuest, nil
+	case "key_mgmt":
+		return m.KeyMgmt, nil
+	case "group":
+		return m.Group, nil
+	case "band":
+		return m.Band, nil
+	case "channel":
+		return m.Channel, nil
+	case "vlan_id":
+		return m.VlanId, nil
+	case "proto":
+		return m.Proto, nil
+	case "rssi":
+		return m.Rssi, nil
+	case "snr":
+		return m.Snr, nil
+	case "idle_time":
+		return m.IdleTime, nil
+	case "tx_rate":
+		return m.TxRate, nil
+	case "rx_rate":
+		return m.RxRate, nil
+	case "tx_pkts":
+		return m.TxPkts, nil
+	case "rx_pkts":
+		return m.RxPkts, nil
+	case "tx_bytes":
+		return m.TxBytes, nil
+	case "rx_bytes":
+		return m.RxBytes, nil
+	case "tx_retries":
+		return m.TxRetries, nil
+	case "rx_retries":
+		return m.RxRetries, nil
+	case "tx_bps":
+		return m.TxBps, nil
+	case "rx_bps":
+		return m.RxBps, nil
+	case "map_id":
+		return m.MapId, nil
+	case "x":
+		return m.MapX, nil
+	case "y":
+		return m.MapY, nil
+	case "x_m":
+		return m.MapXM, nil
+	case "y_m":
+		return m.MapYM, nil
+	case "num_locating_aps":
+		return m.NumLocatingAps, nil
+	case "_ttl":
+		return m.Ttl, nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
+}
+
 func (m *WsMsgClientStat) GetJsonKeyValueAsStr(key string) (string, error) {
 	switch key {
 	case "mac":
@@ -317,6 +420,39 @@ type WsMsgMapClient struct {
 	Lastseen	json.Number	`json:"last_seen"`
 }
 
+func (m *WsMsgMapClient) GetJsonKeyValue(key string) (interface{}, error) {
+	switch key {
+	case "mac":
+		return m.Mac, nil
+	case "rssi":
+		return m.Rssi, nil
+	case "map_id":
+		return m.MapId, nil
+	case "x":
+		return m.MapX, nil
+	case "y":
+		return m.MapY, nil
+	case "x_m":
+		return m.MapXM, nil
+	case "y_m":
+		return m.MapYM, nil
+	case "num_locating_aps":
+		return m.NumLocatingAps, nil
+	case "connected_ap":
+		return m.ConnectedAp, nil
+	case "ap_mac":
+		return m.ApMac, nil
+	case "last_seen":
+		return m.Lastseen, nil
+	case "_ttl":
+		return m.Ttl, nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
+}
+
 func (m *WsMsgMapClient) GetJsonKeyValueAsStr(key string) (string, error) {
 	switch key {
 	case "mac":
@@ -401,7 +537,6 @@ func (m *WsMsgMapClient) GetJsonKeyValueAsInt64(key string) (int64, error) {
 }
 
 
-
 /*
  * BLE location on Map WebSocket Message
  * For receiving data for:
@@ -441,6 +576,74 @@ type WsMsgMapBleAsset struct {
 	Timestamp		json.Number	`json:"_timestamp"`
 	Ttl			json.Number	`json:"_ttl"`
 }
+
+func (m *WsMsgMapBleAsset) GetJsonKeyValue(key string) (interface{}, error) {
+	switch key {
+	case "mac":
+		return m.Mac, nil
+	case "curr_site":
+		return m.CurrSite, nil
+	case "map_id":
+		return m.MapId, nil
+	case "id":
+		return m.AssetId, nil
+	case "device_id":
+		return m.DevId, nil
+	case "by":
+		return m.By, nil
+	case "name":
+		return m.Name, nil
+	case "device_name":
+		return m.DevName, nil
+	case "_id":
+		return m.Id, nil
+	case "manufacture":
+		return m.Manufacture, nil
+	case "temperature":
+		return m.Temperature, nil
+	case "battery_voltage":
+		return m.BattVoltage, nil
+	case "service_data":
+		return m.ServiceData, nil
+	case "ibeacon_uuid":
+		return m.IbeaconUUID, nil
+	case "ibeacon_major":
+		return m.IbeaconMajor, nil
+	case "ibeacon_minor":
+		return m.IbeaconMinor, nil
+	case "eddystone_uid_namespace":
+		return m.EddystoneUIDNamespace, nil
+	case "eddystone_uid_instance":
+		return m.EddystoneUIDInstance, nil
+	case "eddystone_url":
+		return m.EddystoneURL, nil
+	case "x":
+		return m.MapX, nil
+	case "y":
+		return m.MapY, nil
+	case "x_m":
+		return m.MapXM, nil
+	case "y_m":
+		return m.MapYM, nil
+	case "beam":
+		return m.Beam, nil
+	case "rssi":
+		return m.Rssi, nil
+	case "ap_mac":
+		return m.ApMac, nil
+	case "last_seen":
+		return m.Lastseen, nil
+	case "_timestamp":
+		return m.Timestamp, nil
+	case "_ttl":
+		return m.Ttl, nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
+}
+
 
 func (m *WsMsgMapBleAsset) GetJsonKeyValueAsStr(key string) (string, error) {
 	switch key {

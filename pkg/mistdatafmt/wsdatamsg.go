@@ -557,7 +557,7 @@ type WsMsgMapBleAsset struct {
 	Manufacture		string		`json:"manufacture"`
 	Temperature		json.Number	`json:"temperature"`
 	BattVoltage		json.Number	`json:"battery_voltage"`
-	ServiceData		string		`json:"service_data"`
+	ServiceData		WsMsgBleSvcData	`json:"service_data"`
 	IbeaconUUID		string		`json:"ibeacon_uuid"`
 	IbeaconMajor		json.Number	`json:"ibeacon_major"`
 	IbeaconMinor		json.Number	`json:"ibeacon_minor"`
@@ -671,8 +671,6 @@ func (m *WsMsgMapBleAsset) GetJsonKeyValueAsStr(key string) (string, error) {
 		return string(m.Temperature), nil
 	case "battery_voltage":
 		return string(m.BattVoltage), nil
-	case "service_data":
-		return m.ServiceData, nil
 	case "ibeacon_uuid":
 		return m.IbeaconUUID, nil
 	case "ibeacon_major":
@@ -781,4 +779,73 @@ func (m *WsMsgMapBleAsset) GetJsonKeyValueInt64(key string) (int64, error) {
 
 	return 0, fmt.Errorf("Specified key not found")
 }
+
+type WsMsgBleSvcData struct {
+	UUID			string		`json:"uuid"`
+	Data			string		`json:"data"`
+	RxCnt			json.Number	`json:"rx_cnt"`
+	LastRxTime		json.Number	`json:"last_rx_time"`
+}
+
+func (m *WsMsgBleSvcData) GetJsonKeyValue(key string) (interface{}, error) {
+	switch key {
+	case "uuid":
+		return m.UUID, nil
+	case "data":
+		return m.Data, nil
+	case "rx_cnt":
+		return m.RxCnt, nil
+	case "last_rx_time":
+		return m.LastRxTime, nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
+}
+
+
+func (m *WsMsgBleSvcData) GetJsonKeyValueAsStr(key string) (string, error) {
+	switch key {
+	case "uuid":
+		return m.UUID, nil
+	case "data":
+		return m.Data, nil
+	case "rx_cnt":
+		return string(m.RxCnt), nil
+	case "last_rx_time":
+		return string(m.LastRxTime), nil
+	default:
+		return "", fmt.Errorf("Specified key not found")
+	}
+
+	return "", fmt.Errorf("Specified key not found")
+}
+
+func (m *WsMsgBleSvcData) GetJsonKeyValueAsFloat64(key string) (float64, error) {
+	switch key {
+	case "rx_cnt":
+		return m.RxCnt.Float64()
+	case "last_rx_time":
+		return m.LastRxTime.Float64()
+	default:
+		return 0, fmt.Errorf("Specified key not found")
+	}
+
+	return 0, fmt.Errorf("Specified key not found")
+}
+
+func (m *WsMsgBleSvcData) GetJsonKeyValueInt64(key string) (int64, error) {
+	switch key {
+	case "rx_cnt":
+		return m.RxCnt.Int64()
+	case "last_rx_time":
+		return m.LastRxTime.Int64()
+	default:
+		return 0, fmt.Errorf("Specified key not found")
+	}
+
+	return 0, fmt.Errorf("Specified key not found")
+}
+
 

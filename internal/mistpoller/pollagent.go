@@ -165,6 +165,8 @@ func (s *PollAgent) processData(data string) {
 			return
 		}
 
+		needPublish := false
+		currData := make(map[string]mistdatafmt.MistDataFmtIntf)
 		for _, entry := range(entries) {
 			uniqueKeyVal, err := entry.GetJsonKeyValueAsStr(s.UniqueKey)
 			if err != nil {
@@ -175,18 +177,28 @@ func (s *PollAgent) processData(data string) {
 			prev, exists := s.prevData[uniqueKeyVal]
 			if !exists || s.dataHasChanged(prev, entry) {
 				if s.Debug {
-					log.Printf("agent#%d: publish %s exists=%v", s.Id, uniqueKeyVal, exists)
+					log.Printf("agent#%d: difference in key %s exists=%v", s.Id, uniqueKeyVal, exists)
 				}
-
-				out, err := json.Marshal(entry)
-				if err != nil {
-					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uniqueKeyVal, err)
-					continue
-				}
-
-				s.doPublish(string(out))
-				s.prevData[uniqueKeyVal] = entry
+				needPublish = true
 			}
+			currData[uniqueKeyVal] = entry
+		}
+
+		for key, _ := range(s.prevData) {
+			_, ok := currData[key]
+			if !ok {
+				log.Printf("agent#%d: key has been deleted %s", s.Id, key)
+				needPublish = true
+			}
+		}
+
+		// sent all keys so that delete can be handled on receiver
+		if needPublish {
+			log.Printf("agent#%d: publish data %s", s.Id, data)
+			s.doPublish(data)
+			s.prevData = currData
+		} else {
+			log.Printf("agent%d: no need to publish data")
 		}
 
 	case "zones":
@@ -206,6 +218,8 @@ func (s *PollAgent) processData(data string) {
 			return
 		}
 
+		needPublish := false
+		currData := make(map[string]mistdatafmt.MistDataFmtIntf)
 		for _, entry := range(entries) {
 			uniqueKeyVal, err := entry.GetJsonKeyValueAsStr(s.UniqueKey)
 			if err != nil {
@@ -213,22 +227,32 @@ func (s *PollAgent) processData(data string) {
 				continue
 			}
 
-			// TODO: vertices/vertices_m fields may need to be sorted before comparing
+			// TODO: zone vertice may need to be sorted..
 			prev, exists := s.prevData[uniqueKeyVal]
 			if !exists || s.dataHasChanged(prev, entry) {
 				if s.Debug {
-					log.Printf("agent#%d: publish %s exists=%v", s.Id, uniqueKeyVal, exists)
+					log.Printf("agent#%d: difference in key %s exists=%v", s.Id, uniqueKeyVal, exists)
 				}
-
-				out, err := json.Marshal(entry)
-				if err != nil {
-					log.Printf("agent#%d: failed to re-marshal data for %s (%v)", s.Id, uniqueKeyVal, err)
-					continue
-				}
-
-				s.doPublish(string(out))
-				s.prevData[uniqueKeyVal] = entry
+				needPublish = true
 			}
+			currData[uniqueKeyVal] = entry
+		}
+
+		for key, _ := range(s.prevData) {
+			_, ok := currData[key]
+			if !ok {
+				log.Printf("agent#%d: key has been deleted %s", s.Id, key)
+				needPublish = true
+			}
+		}
+
+		// sent all keys so that delete can be handled on receiver
+		if needPublish {
+			log.Printf("agent#%d: publish data", s.Id, data)
+			s.doPublish(data)
+			s.prevData = currData
+		} else {
+			log.Printf("agent%d: no need to publish data", s.Id)
 		}
 
 	case "raw":
